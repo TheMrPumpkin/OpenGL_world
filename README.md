@@ -1,4 +1,4 @@
-# OpenGL Terrain Project
+# OpenGL_world
 
 A learning project exploring Modern OpenGL (4.4 core profile) in C++ — built while
 working through terrain rendering, texturing, and camera controls.
@@ -31,7 +31,7 @@ under `include/` in the project root.
 
 ```bash
 # Clone the repo
-git clone <your-repo-url>
+git clone https://github.com/TheMrPumpkin/OpenGL_world.git
 cd OpenGL_world
 
 # Configure and build
@@ -60,7 +60,7 @@ If the build is in a broken state (stale paths, weird linker errors), the
 safest fix is a clean rebuild:
 
 ```bash
-cd ~/Documents/VSC/OpenGL/OpenGL_project2
+cd ~/Documents/VSC/OpenGL/OpenGL_world
 rm -rf build
 mkdir build && cd build
 cmake ..
@@ -85,7 +85,7 @@ if you relocate the GLM folder.
 ## Project Structure
 
 ```
-OpenGL_project2/
+OpenGL_world/
 ├── CMakeLists.txt
 ├── include/           # GLAD, GLM, stb_image, shader.h
 ├── images/            # Textures (copied to build/ on configure)
@@ -102,7 +102,10 @@ OpenGL_project2/
 ## Roadmap
 
 - [ ] Terrain generation (heightmap-based)
-- [ ] Lighting (Phong/Blinn-Phong)
+- [ ] Load and render 3D models (e.g. via Assimp)
+- [ ] Full object rotation controls (all axes)
+- [ ] Lighting (Phong/Blinn-Phong — ambient/diffuse/specular)
+- [ ] Config system for easily swapping textures/materials/parameters without recompiling
 - [ ] Element buffer objects for indexed drawing
 - [ ] Multiple objects / scene graph
 
