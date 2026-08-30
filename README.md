@@ -32,7 +32,7 @@ under `include/` in the project root.
 ```bash
 # Clone the repo
 git clone <your-repo-url>
-cd OpenGL_project2
+cd OpenGL_world
 
 # Configure and build
 mkdir build && cd build
