@@ -2,13 +2,14 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <math.h>
-#include "/home/Mrpumpkin/Documents/VSC/OpenGL/OpenGL_project2/include/shader.h"
+#include "/home/Mrpumpkin/Documents/VSC/OpenGL/OpenGL_world/include/shader.h"
 #define STB_IMAGE_IMPLEMENTATION
-#include "/home/Mrpumpkin/Documents/VSC/OpenGL/OpenGL_project2/include/stb_image.h"
+#include "/home/Mrpumpkin/Documents/VSC/OpenGL/OpenGL_world/include/stb_image.h"
 #include "OpenGLDebug.h"
 #include "camera.h"
 #include "Mouse.h"
 #include "VertexArray.h"
+#include "Texture2D.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -58,56 +59,14 @@ int main()
         return -1;
     }
     glEnable(GL_DEPTH_TEST);
-    Shader ourshader("/home/Mrpumpkin/Documents/VSC/OpenGL/OpenGL_project2/src/OpenGL_world/VertexShader.vs",
-                     "/home/Mrpumpkin/Documents/VSC/OpenGL/OpenGL_project2/src/OpenGL_world/FragmentShader.fs");
+    Shader ourshader("/home/Mrpumpkin/Documents/VSC/OpenGL/OpenGL_world/src/VertexShader.vs",
+                     "/home/Mrpumpkin/Documents/VSC/OpenGL/OpenGL_world/src/FragmentShader.fs");
 
     vertexArray.Vertexarray();
     vertexArray.cubePositions;
 
-    GLuint Texture1, Texture2;
-    glGenTextures(1, &Texture1);
-    glGenTextures(1, &Texture2);
-    glBindTexture(GL_TEXTURE_2D, Texture1);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    stbi_set_flip_vertically_on_load(true);
-    int w, h, nchanel;
-    unsigned char *data = stbi_load("/home/Mrpumpkin/Documents/VSC/OpenGL/OpenGL_project2/images/dirt.jpg", &w, &h, &nchanel, 0);
-    if (data)
-    {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    else
-    {
-        std::cout << "Texture error!(1)" << std::endl;
-        glfwTerminate();
-        return -1;
-    }
-
-    glBindTexture(GL_TEXTURE_2D, Texture2);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-
-    data = stbi_load("/home/Mrpumpkin/Documents/VSC/OpenGL/OpenGL_project2/images/awesomeface.png", &w, &h, &nchanel, 0);
-    if (data)
-    {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    else
-    {
-        std::cout << "Texture error!(2)" << std::endl;
-        glfwTerminate();
-        return -1;
-    }
+    Texture2D dirt_texture("/home/Mrpumpkin/Documents/VSC/OpenGL/OpenGL_world/images/dirt.jpg");
+    Texture2D dirtawesomeface_texture("/home/Mrpumpkin/Documents/VSC/OpenGL/OpenGL_world/images/awesomeface.png");
 
     ourshader.use();
     glUniform1i(glGetUniformLocation(ourshader.ID, "TEXTURE1"), 0);
@@ -121,9 +80,9 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         // textures
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, Texture1);
+        dirt_texture.bind();
         glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, Texture2);
+        dirtawesomeface_texture.bind();
 
         ourshader.use();
 
@@ -149,7 +108,7 @@ int main()
         unsigned int viewlLOC = glGetUniformLocation(ourshader.ID, "view");
         glUniformMatrix4fv(viewlLOC, 1, GL_FALSE, glm::value_ptr(view));
 
-        camera.cords();
+        // camera.cords();
         // window
         glfwSwapBuffers(window);
         glfwPollEvents();
