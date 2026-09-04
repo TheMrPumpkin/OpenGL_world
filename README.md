@@ -1,5 +1,4 @@
 # OpenGL_world
-
 A learning project exploring Modern OpenGL (4.4 core profile) in C++ — built while
 working through terrain rendering, texturing, and camera controls.
 
@@ -7,15 +6,14 @@ working through terrain rendering, texturing, and camera controls.
 > **Project Structure** sections as the project grows (see the note at the bottom).
 
 ## Features
-
 - OpenGL 4.4 core profile context with debug output enabled
 - Textured cube rendering (multi-texture blending via two bound texture units)
 - Free-fly camera with WASD movement, mouse-look, and scroll-to-zoom (FOV)
 - Simple `VertexArray` class wrapping VAO/VBO setup
+- `Texture2D` class for loading and binding textures (see Updates below)
 - Terrain rendering *(in progress — see Roadmap)*
 
 ## Dependencies
-
 | Library | Purpose |
 |---|---|
 | [GLFW](https://www.glfw.org/) | Window creation and input handling |
@@ -28,7 +26,6 @@ e.g. via your distro's package manager). GLAD, GLM, and stb_image are expected
 under `include/` in the project root.
 
 ## Building with CMake
-
 ```bash
 # Clone the repo
 git clone https://github.com/TheMrPumpkin/OpenGL_world.git
@@ -44,12 +41,10 @@ make -j$(nproc)
 ```
 
 ### Rebuilding after adding/removing source files or moving folders
-
 CMake's `file(GLOB_RECURSE ...)` only scans `src/` at **configure time**
 (when `cmake ..` runs) — not on every `make`. If you add, remove, or move
 `.cpp`/`.h` files, you need to re-run `cmake ..` (or wipe and reconfigure)
 for the build to pick up the change:
-
 ```bash
 cd build
 cmake ..          # re-scan src/ for new/removed files
@@ -58,7 +53,6 @@ make -j$(nproc)
 
 If the build is in a broken state (stale paths, weird linker errors), the
 safest fix is a clean rebuild:
-
 ```bash
 cd ~/Documents/VSC/OpenGL/OpenGL_world
 rm -rf build
@@ -68,14 +62,12 @@ make -j$(nproc)
 ```
 
 ### Updating dependencies / GLM path
-
 If CMake can't find GLM (`Could not find GLM_INCLUDE_DIR`), make sure GLM's
 headers live under `include/glm/glm/glm.hpp` relative to the project root,
 matching the `HINTS` path in `CMakeLists.txt`. Adjust the `HINTS` path there
 if you relocate the GLM folder.
 
 ## Controls
-
 | Input | Action |
 |---|---|
 | `W` / `A` / `S` / `D` | Move camera forward / left / back / right |
@@ -83,7 +75,6 @@ if you relocate the GLM folder.
 | Scroll wheel | Zoom (adjusts FOV) |
 
 ## Project Structure
-
 ```
 OpenGL_world/
 ├── CMakeLists.txt
@@ -94,13 +85,30 @@ OpenGL_world/
     ├── camera.h / camera.cpp
     ├── Mouse.h / Mouse.cpp
     ├── VertexArray.h / VertexArray.cpp
+    ├── Texture2D.h / Texture2D.cpp
     ├── OpenGLDebug.h / OpenGLDebug.cpp
     ├── VertexShader.vs
     └── FragmentShader.fs
 ```
 
-## Roadmap
+## Updates
 
+### Texture loading (Texture2D class)
+- Added a `Texture2D` class (constructor + `bind()`), following the same
+  pattern as the existing `Shader` class — one object per texture, path
+  passed to the constructor.
+- Constructor handles `glGenTextures`/`glBindTexture`, wrap/filter params,
+  loading via `stbi_load`, and uploading with `glTexImage2D` +
+  `glGenerateMipmap`.
+- Format (`GL_RGB` vs `GL_RGBA`) is chosen dynamically based on the
+  channel count returned by `stbi_load`, so both JPG (3 channels) and
+  PNG (4 channels, with alpha) load correctly.
+- `stbi_set_flip_vertically_on_load(true)` set before loading, to match
+  OpenGL's expected texture coordinate origin.
+- Two texture units bound in the render loop via `glActiveTexture` +
+  `bind()`, for the multi-texture blending feature listed above.
+
+## Roadmap
 - [ ] Terrain generation (heightmap-based)
 - [ ] Load and render 3D models (e.g. via Assimp)
 - [ ] Full object rotation controls (all axes)
@@ -112,9 +120,9 @@ OpenGL_world/
 ---
 
 ### Keeping this README up to date
-
 As the project evolves, update:
 - **Features** — check off/add items as they're implemented
 - **Roadmap** — move completed items up to Features, add new goals
 - **Project Structure** — reflect new files/folders as they're added
 - **Dependencies** — add any new libraries you pull in
+- **Updates** — add a new dated/titled entry each time a feature or fix is completed
