@@ -22,7 +22,8 @@ public:
     std::vector<glm::vec3> cubePositions; // put array in class
     void cubePos(GLuint i);
     void Vertexarray();
-    void bind();
+    void bindVAO();
+    void bindVBO();
 };
 
 #endif

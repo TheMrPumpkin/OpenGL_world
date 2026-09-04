@@ -24,6 +24,8 @@ Mouse mouse;
 // VertexArray
 VertexArray vertexArray;
 
+glm::vec3 lightPos(5.0, 2.0, 0.0);
+
 void frame_buffer_callback(GLFWwindow *window, int w, int h);
 void input_press(GLFWwindow *window);
 void mouse_callback(GLFWwindow *window, double xpos, double ypos);
@@ -59,18 +61,23 @@ int main()
         return -1;
     }
     glEnable(GL_DEPTH_TEST);
-    Shader ourshader("/home/Mrpumpkin/Documents/VSC/OpenGL/OpenGL_world/src/VertexShader.vs",
-                     "/home/Mrpumpkin/Documents/VSC/OpenGL/OpenGL_world/src/FragmentShader.fs");
+    Shader cubeshader("/home/Mrpumpkin/Documents/VSC/OpenGL/OpenGL_world/src/CubeShader.vs",
+                      "/home/Mrpumpkin/Documents/VSC/OpenGL/OpenGL_world/src/CubeShader.fs");
+    Shader cubelightshader("/home/Mrpumpkin/Documents/VSC/OpenGL/OpenGL_world/src/cubelightshader.vs",
+                           "/home/Mrpumpkin/Documents/VSC/OpenGL/OpenGL_world/src/cubelightshader.fs");
 
     vertexArray.Vertexarray();
     vertexArray.cubePositions;
 
-    Texture2D dirt_texture("/home/Mrpumpkin/Documents/VSC/OpenGL/OpenGL_world/images/dirt.jpg");
-    Texture2D dirtawesomeface_texture("/home/Mrpumpkin/Documents/VSC/OpenGL/OpenGL_world/images/awesomeface.png");
+    GLuint lightVAO;
+    glGenVertexArrays(1, &lightVAO);
+    glBindVertexArray(lightVAO);
+    vertexArray.bindVBO();
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+    glEnableVertexAttribArray(0);
 
-    ourshader.use();
-    glUniform1i(glGetUniformLocation(ourshader.ID, "TEXTURE1"), 0);
-    ourshader.setInt("TEXTURE2", 1);
+    // Texture2D dirt_texture("/home/Mrpumpkin/Documents/VSC/OpenGL/OpenGL_world/images/dirt.jpg");
+    // Texture2D dirtawesomeface_texture("/home/Mrpumpkin/Documents/VSC/OpenGL/OpenGL_world/images/awesomeface.png");
 
     while (!glfwWindowShouldClose(window))
     {
@@ -78,37 +85,38 @@ int main()
         // BG
         glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        // textures
-        glActiveTexture(GL_TEXTURE0);
-        dirt_texture.bind();
-        glActiveTexture(GL_TEXTURE1);
-        dirtawesomeface_texture.bind();
 
-        ourshader.use();
-
-        glm::mat4 proj = camera.perspective(screen_w, screen_h);
-        unsigned int projLOC = glGetUniformLocation(ourshader.ID, "proj");
-        glUniformMatrix4fv(projLOC, 1, GL_FALSE, glm::value_ptr(proj));
-
-        // objects
-        vertexArray.bind();
-
-        for (GLuint i = 0; i < 1; i++)
-        {
-            glm::mat4 model = glm::mat4(1.0f);
-            model = glm::translate(model, vertexArray.cubePositions[i]);
-            model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(1.0f, 0.3f, 0.5f));
-            unsigned int modelLOC = glGetUniformLocation(ourshader.ID, "model");
-            glUniformMatrix4fv(modelLOC, 1, GL_FALSE, glm::value_ptr(model));
-            glDrawArrays(GL_TRIANGLES, 0, 36);
-        }
+        cubeshader.use();
+        cubeshader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
+        cubeshader.setVec3("lightColor", 0.0f, 0.85f, 0.65f);
 
         glm::mat4 view = camera.GetViewMatrix();
-        view = glm::lookAt(camera.cameraPos, camera.cameraFront + camera.cameraPos, camera.up);
-        unsigned int viewlLOC = glGetUniformLocation(ourshader.ID, "view");
-        glUniformMatrix4fv(viewlLOC, 1, GL_FALSE, glm::value_ptr(view));
+        cubeshader.setMat4("view", view);
 
-        // camera.cords();
+        glm::mat4 proj = camera.perspective(screen_w, screen_h);
+        cubeshader.setMat4("proj", proj);
+
+        vertexArray.bindVAO();
+        glm::mat4 model = glm::mat4(1.0f);
+        cubeshader.setMat4("model", model);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        cubelightshader.use();
+
+        cubelightshader.setMat4("view", view);
+
+        cubelightshader.setMat4("proj", proj);
+
+        model = glm::mat4(1.0f);
+        model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+        model = glm::translate(model, lightPos);
+        model = glm::scale(model, glm::vec3(0.2f));
+        cubelightshader.setMat4("model", model);
+        glBindVertexArray(lightVAO);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        camera.cords();
+
         // window
         glfwSwapBuffers(window);
         glfwPollEvents();
