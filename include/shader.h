@@ -8,7 +8,9 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
-
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 class Shader
 {
 public:
@@ -92,6 +94,31 @@ public:
         glUniform1f(glGetUniformLocation(ID, name.c_str()), value);
     }
 
+    void setVec2(const std::string &name, float value1, float value2) const
+    {
+        glUniform2f(glGetUniformLocation(ID, name.c_str()), value1, value2);
+    }
+
+    void setVec3(const std::string &name, float value1, float value2, float value3) const
+    {
+        glUniform3f(glGetUniformLocation(ID, name.c_str()), value1, value2, value3);
+    }
+
+    void setVec4(const std::string &name, float value1, float value2, float value3, float value4) const
+    {
+        glUniform4f(glGetUniformLocation(ID, name.c_str()), value1, value2, value3, value4);
+    }
+
+    void setMat3(const std::string &name, const glm::mat3 &value) const
+    {
+        glUniformMatrix3fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(value));
+    }
+
+    void setMat4(const std::string &name, const glm::mat4 &value) const
+    {
+        glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(value));
+    }
+    //(projLOC, 1, GL_FALSE, glm::value_ptr(proj));
 private:
     // utility function for checking shader compilation/linking errors.
     // ------------------------------------------------------------------------
