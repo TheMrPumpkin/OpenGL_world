@@ -4,8 +4,6 @@ out vec4 FragColor;
 //in vec2 Tex;
 
 
-
-
 void main()
 {
     

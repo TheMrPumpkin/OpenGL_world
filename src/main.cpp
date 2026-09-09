@@ -24,8 +24,7 @@ Mouse mouse;
 // VertexArray
 VertexArray vertexArray;
 
-glm::vec3 lightPos(5.0, 2.0, 0.0);
-
+glm::vec3 lightPos(0.0f, 2.0f, 0.0f);
 void frame_buffer_callback(GLFWwindow *window, int w, int h);
 void input_press(GLFWwindow *window);
 void mouse_callback(GLFWwindow *window, double xpos, double ypos);
@@ -73,7 +72,7 @@ int main()
     glGenVertexArrays(1, &lightVAO);
     glBindVertexArray(lightVAO);
     vertexArray.bindVBO();
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
 
     // Texture2D dirt_texture("/home/Mrpumpkin/Documents/VSC/OpenGL/OpenGL_world/images/dirt.jpg");
@@ -88,7 +87,9 @@ int main()
 
         cubeshader.use();
         cubeshader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
-        cubeshader.setVec3("lightColor", 0.0f, 0.85f, 0.65f);
+        cubeshader.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
+        cubeshader.setVec3("lightPos", lightPos.x, lightPos.y, lightPos.z);
+        cubeshader.setVec3("viewPos", camera.cameraPos.x, camera.cameraPos.y, camera.cameraPos.z);
 
         glm::mat4 view = camera.GetViewMatrix();
         cubeshader.setMat4("view", view);
@@ -98,6 +99,7 @@ int main()
 
         vertexArray.bindVAO();
         glm::mat4 model = glm::mat4(1.0f);
+        model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(1.0f, 3.0f, 2.0f));
         cubeshader.setMat4("model", model);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
@@ -108,8 +110,8 @@ int main()
         cubelightshader.setMat4("proj", proj);
 
         model = glm::mat4(1.0f);
-        model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
         model = glm::translate(model, lightPos);
+        model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 5.0f));
         model = glm::scale(model, glm::vec3(0.2f));
         cubelightshader.setMat4("model", model);
         glBindVertexArray(lightVAO);
