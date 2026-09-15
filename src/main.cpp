@@ -2,7 +2,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <math.h>
-#include "/home/Mrpumpkin/Documents/VSC/OpenGL/OpenGL_world/include/shader.h"
+#include "/home/Mrpumpkin/Documents/VSC/OpenGL/OpenGL_world/include/shader_debug.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include "/home/Mrpumpkin/Documents/VSC/OpenGL/OpenGL_world/include/stb_image.h"
 #include "OpenGLDebug.h"
@@ -60,10 +60,10 @@ int main()
         return -1;
     }
     glEnable(GL_DEPTH_TEST);
-    Shader lightshader("/home/Mrpumpkin/Documents/VSC/OpenGL/OpenGL_world/src/lightshader.vs",
-                       "/home/Mrpumpkin/Documents/VSC/OpenGL/OpenGL_world/src/lightshader.fs");
-    Shader cubelightshader("/home/Mrpumpkin/Documents/VSC/OpenGL/OpenGL_world/src/cubelightshader.vs",
-                           "/home/Mrpumpkin/Documents/VSC/OpenGL/OpenGL_world/src/cubelightshader.fs");
+    Shader lightshader("/home/Mrpumpkin/Documents/VSC/OpenGL/OpenGL_world/include/shaders/lightshader.vs",
+                       "/home/Mrpumpkin/Documents/VSC/OpenGL/OpenGL_world/include/shaders/lightshader.fs");
+    Shader cubelightshader("/home/Mrpumpkin/Documents/VSC/OpenGL/OpenGL_world/include/shaders/cubelightshader.vs",
+                           "/home/Mrpumpkin/Documents/VSC/OpenGL/OpenGL_world/include/shaders/cubelightshader.fs");
 
     vertexArray.Vertexarray();
     vertexArray.cubePositions;
