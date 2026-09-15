@@ -10,7 +10,9 @@ working through terrain rendering, texturing, and camera controls.
 - Textured cube rendering (multi-texture blending via two bound texture units)
 - Free-fly camera with WASD movement, mouse-look, and scroll-to-zoom (FOV)
 - Simple `VertexArray` class wrapping VAO/VBO setup
-- `Texture2D` class for loading and binding textures (see Updates below)
+- `Texture2D` class for loading and binding textures
+- Basic Phong lighting (ambient + diffuse + specular) on a cube, with a
+  separate cube representing the light source (see Updates below)
 - Terrain rendering *(in progress — see Roadmap)*
 
 ## Dependencies
@@ -78,20 +80,42 @@ if you relocate the GLM folder.
 ```
 OpenGL_world/
 ├── CMakeLists.txt
-├── include/           # GLAD, GLM, stb_image, shader.h
+├── include/
+│   ├── glad/
+│   ├── glfw-3.4/
+│   ├── glm/
+│   ├── shaders/
+│   │   ├── cubelightshader.fs
+│   │   ├── cubelightshader.vs
+│   │   ├── lightshader.fs
+│   │   └── lightshader.vs
+│   ├── shader_debug.h
+│   └── stb_image.h
 ├── images/            # Textures (copied to build/ on configure)
-└── src/
-    ├── main.cpp
-    ├── camera.h / camera.cpp
-    ├── Mouse.h / Mouse.cpp
-    ├── VertexArray.h / VertexArray.cpp
-    ├── Texture2D.h / Texture2D.cpp
-    ├── OpenGLDebug.h / OpenGLDebug.cpp
-    ├── VertexShader.vs
-    └── FragmentShader.fs
+├── src/
+│   ├── main.cpp
+│   ├── camera.h / camera.cpp
+│   ├── Mouse.h / Mouse.cpp
+│   ├── VertexArray.h / VertexArray.cpp
+│   ├── Texture2D.h / Textrue2D.cpp
+│   └── OpenGLDebug.h / OpenGLDebug.cpp
+├── .gitattributes
+├── .gitignore
+└── LICENSE
 ```
 
 ## Updates
+
+### Lighting shaders — Phong lighting (2026-09-15)
+- Shaders moved out of `src/` into their own `include/shaders/` folder, and
+  split into two pairs:
+  - `lightshader.vs` / `lightshader.fs` — draws the cube that represents the
+    light source itself (a simple, unlit solid color).
+  - `cubelightshader.vs` / `cubelightshader.fs` — draws the lit object,
+    implementing basic Phong lighting: ambient, diffuse, and specular terms
+    computed from the vertex normal, light position, and view position.
+- Added `shader_debug.h` under `include/` for shader compile/link error
+  checking.
 
 ### Texture loading (Texture2D class)
 - Added a `Texture2D` class (constructor + `bind()`), following the same
@@ -112,7 +136,8 @@ OpenGL_world/
 - [ ] Terrain generation (heightmap-based)
 - [ ] Load and render 3D models (e.g. via Assimp)
 - [ ] Full object rotation controls (all axes)
-- [ ] Lighting (Phong/Blinn-Phong — ambient/diffuse/specular)
+- [x] Lighting (Phong — ambient/diffuse/specular)
+- [ ] Blinn-Phong lighting variant
 - [ ] Config system for easily swapping textures/materials/parameters without recompiling
 - [ ] Element buffer objects for indexed drawing
 - [ ] Multiple objects / scene graph
