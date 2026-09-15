@@ -91,7 +91,6 @@ OpenGL_world/
 │   │   └── lightshader.vs
 │   ├── shader_debug.h
 │   └── stb_image.h
-├── images/            # Textures (copied to build/ on configure)
 ├── src/
 │   ├── main.cpp
 │   ├── camera.h / camera.cpp
