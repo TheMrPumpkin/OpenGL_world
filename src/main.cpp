@@ -83,9 +83,18 @@ int main()
         // BG
         glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glm::vec3 lightcolor;
+        lightcolor.x = sin((float)glfwGetTime() * 2.6f);
+        lightcolor.y = sin((float)glfwGetTime() * 0.2f);
+        lightcolor.z = sin((float)glfwGetTime() * 0.5f);
+
+        glm::vec3 ambientcolor = lightcolor * glm::vec3(0.5);
+        glm::vec3 diffusecolor = lightcolor * glm::vec3(0.2);
 
         lightshader.use();
-        lightshader.setVec3("lightColor", 1.0f, 1.0f, 1.0f);
+        lightshader.setVec3("light.ambient", ambientcolor.x, ambientcolor.y, ambientcolor.z);
+        lightshader.setVec3("light.diffuse", diffusecolor.x, diffusecolor.y, diffusecolor.z); // how much dark
+        lightshader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
         lightshader.setVec3("material.ambient", 0.0215f, 0.1745f, 0.0215f);
         lightshader.setVec3("material.diffuse", 0.07568f, 0.61424f, 0.07568f);
         lightshader.setVec3("material.specular", 0.633f, 0.727811f, 0.633f);
