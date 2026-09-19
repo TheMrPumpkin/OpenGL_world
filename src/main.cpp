@@ -10,6 +10,7 @@
 #include "Mouse.h"
 #include "VertexArray.h"
 #include "Texture2D.h"
+#include "FileSystem.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -24,7 +25,7 @@ Mouse mouse;
 // VertexArray
 VertexArray vertexArray;
 
-glm::vec3 lightPos;
+glm::vec3 lightPos(1.2f, 0.5f, 2.3f);
 void frame_buffer_callback(GLFWwindow *window, int w, int h);
 void input_press(GLFWwindow *window);
 void mouse_callback(GLFWwindow *window, double xpos, double ypos);
@@ -72,34 +73,34 @@ int main()
     glGenVertexArrays(1, &lightVAO);
     glBindVertexArray(lightVAO);
     vertexArray.bindVBO();
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
-    // Texture2D dirt_texture("/home/Mrpumpkin/Documents/VSC/OpenGL/OpenGL_world/images/dirt.jpg");
-    // Texture2D dirtawesomeface_texture("/home/Mrpumpkin/Documents/VSC/OpenGL/OpenGL_world/images/awesomeface.png");
+    Texture2D diffuseMap(FileSystem::getPath("/images/container2.png").c_str());
 
+    lightshader.use();
+    lightshader.setInt("material.diffuse", 0);
     while (!glfwWindowShouldClose(window))
     {
         camera.move(window);
         // BG
         glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glm::vec3 lightcolor;
-        lightcolor.x = sin((float)glfwGetTime() * 2.6f);
-        lightcolor.y = sin((float)glfwGetTime() * 0.2f);
-        lightcolor.z = sin((float)glfwGetTime() * 0.5f);
 
-        glm::vec3 ambientcolor = lightcolor * glm::vec3(0.5);
-        glm::vec3 diffusecolor = lightcolor * glm::vec3(0.2);
+        float time = (float)glfwGetTime();
+        float radius = 2.5f;
+        lightPos.x = cos(time) * radius;
+        lightPos.y = 1.0f;
+        lightPos.z = sin(time) * radius;
 
         lightshader.use();
-        lightshader.setVec3("light.ambient", ambientcolor.x, ambientcolor.y, ambientcolor.z);
-        lightshader.setVec3("light.diffuse", diffusecolor.x, diffusecolor.y, diffusecolor.z); // how much dark
+        lightshader.setVec3("light.ambient", 0.5f, 0.5f, 0.5f);
+        lightshader.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
         lightshader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
-        lightshader.setVec3("material.ambient", 0.0215f, 0.1745f, 0.0215f);
-        lightshader.setVec3("material.diffuse", 0.07568f, 0.61424f, 0.07568f);
-        lightshader.setVec3("material.specular", 0.633f, 0.727811f, 0.633f);
-        lightshader.setFloat("material.shininess", 0.6f);
-        lightshader.setVec3("lightPos", lightPos.x, lightPos.y, lightPos.z);
+
+        // material properties
+        lightshader.setVec3("material.specular", 0.5f, 0.5f, 0.5f);
+        lightshader.setFloat("material.shininess", 64.0f);
+        lightshader.setVec3("light.position", lightPos.x, lightPos.y, lightPos.z);
         lightshader.setVec3("viewPos", camera.cameraPos.x, camera.cameraPos.y, camera.cameraPos.z);
 
         glm::mat4 view = camera.GetViewMatrix();
@@ -108,7 +109,10 @@ int main()
         glm::mat4 proj = camera.perspective(screen_w, screen_h);
         lightshader.setMat4("proj", proj);
 
+        glActiveTexture(GL_TEXTURE0);
+        diffuseMap.bind();
         vertexArray.bindVAO();
+
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(1.0f, 3.0f, 2.0f));
         lightshader.setMat4("model", model);
@@ -120,11 +124,6 @@ int main()
 
         cubelightshader.setMat4("proj", proj);
 
-        float time = (float)glfwGetTime();
-        float radius = 2.5f;
-        lightPos.x = cos(time) * radius;
-        lightPos.y = 1.0f;
-        lightPos.z = sin(time) * radius;
         model = glm::mat4(1.0f);
         model = glm::translate(model, lightPos);
         model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 5.0f));
