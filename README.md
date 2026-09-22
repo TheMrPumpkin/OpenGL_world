@@ -56,7 +56,7 @@ make -j$(nproc)
 If the build is in a broken state (stale paths, weird linker errors), the
 safest fix is a clean rebuild:
 ```bash
-cd ~/Documents/VSC/OpenGL/OpenGL_world
+cd ~/OpenGL_world
 rm -rf build
 mkdir build && cd build
 cmake ..
