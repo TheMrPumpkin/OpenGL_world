@@ -9,22 +9,32 @@ out vec4 FragColor;
 struct Material {
     vec3 ambient;
     sampler2D diffuse;
-    vec3 specular;
+    sampler2D specular;
     float shininess;
+
 };
 
 
 struct Light {
+    vec3 direction;
     vec3 position;
     
     vec3 ambient;
     vec3 diffuse;
     vec3 specular;
+
+    float constant; // BTW 1.0 
+    float linear; 
+    float quadratic; 
+    float cutoff;
+    float outercutoff;
 };
+
 
     in vec2 TexCoords;
     in vec3 Normal;
     in vec3 FragPos;
+
 uniform Material material;
 uniform Light light;
 uniform vec3 lightPos; 
@@ -32,6 +42,8 @@ uniform vec3 viewPos;
 
 void main()
 {
+
+
     // ambient
     vec3 ambient = light.ambient * vec3(texture(material.diffuse, TexCoords));
     //diffuse
@@ -43,9 +55,26 @@ void main()
     vec3 viewDir = normalize(viewPos - FragPos); // how to side of the cube look on the camera
     vec3 reflectDir = reflect(-lightDir , norm); // how to light come back to the camera
     float spec = pow(max(dot(viewDir , reflectDir),0.0),material.shininess);
-    vec3 specular = material.specular * light.specular * spec;
+    vec3 specular = light.specular * spec * vec3(texture(material.specular , TexCoords));
+
+    // spotlight
+    float theta = dot(lightDir, normalize(-light.direction)); 
+    float epsilon = (light.cutoff - light.outercutoff); // outcutoff all the dark 
+    float intensity = clamp((theta - light.outercutoff) /  epsilon  , 0.0 , 1.0); // the light power!
+    diffuse *= intensity;
+    specular *= intensity;
+
+    // attenuation
+    float distance = length(light.position - FragPos);
+    float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance *distance));
+
+
+    ambient *= attenuation;
+    diffuse *= attenuation;
+    specular *= attenuation;
 
     vec3 result = (diffuse + ambient + specular);
+    
     FragColor = vec4(result, 1.0);
     // mix(texture(TEXTURE1 ,Tex) , texture(TEXTURE2 , Tex) ,0.2)
 } 

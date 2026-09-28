@@ -1,4 +1,5 @@
 # OpenGL_world
+
 A learning project exploring Modern OpenGL (4.4 core profile) in C++ — built while
 working through terrain rendering, texturing, and camera controls.
 
@@ -6,28 +7,30 @@ working through terrain rendering, texturing, and camera controls.
 > **Project Structure** sections as the project grows (see the note at the bottom).
 
 ## Features
+
 - OpenGL 4.4 core profile context with debug output enabled
 - Textured cube rendering (multi-texture blending via two bound texture units)
 - Free-fly camera with WASD movement, mouse-look, and scroll-to-zoom (FOV)
 - Simple `VertexArray` class wrapping VAO/VBO setup
 - `Texture2D` class for loading and binding textures
-- Basic Phong lighting (ambient + diffuse + specular) on a cube, with a
-  separate cube representing the light source (see Updates below)
+- Basic Phong lighting (ambient + diffuse + specular) on a cube, with a separate cube representing the light source (see Updates below)
 - Terrain rendering *(in progress — see Roadmap)*
 
 ## Dependencies
-| Library | Purpose |
-|---|---|
-| [GLFW](https://www.glfw.org/) | Window creation and input handling |
-| [GLAD](https://glad.dav1d.de/) | OpenGL function loader |
-| [GLM](https://github.com/g-truc/glm) | Math library (vectors, matrices, transforms) |
-| [stb_image](https://github.com/nothings/stb) | Image loading for textures |
+
+| Library                                      | Purpose                                      |
+|----------------------------------------------|----------------------------------------------|
+| [GLFW](https://www.glfw.org/)                | Window creation and input handling           |
+| [GLAD](https://glad.dav1d.de/)               | OpenGL function loader                       |
+| [GLM](https://github.com/g-truc/glm)         | Math library (vectors, matrices, transforms) |
+| [stb_image](https://github.com/nothings/stb) | Image loading for textures                   |
 
 GLFW is expected to be found via `find_package(glfw3)` (install it system-wide,
 e.g. via your distro's package manager). GLAD, GLM, and stb_image are expected
 under `include/` in the project root.
 
 ## Building with CMake
+
 ```bash
 # Clone the repo
 git clone https://github.com/TheMrPumpkin/OpenGL_world.git
@@ -43,10 +46,12 @@ make -j$(nproc)
 ```
 
 ### Rebuilding after adding/removing source files or moving folders
+
 CMake's `file(GLOB_RECURSE ...)` only scans `src/` at **configure time**
 (when `cmake ..` runs) — not on every `make`. If you add, remove, or move
 `.cpp`/`.h` files, you need to re-run `cmake ..` (or wipe and reconfigure)
 for the build to pick up the change:
+
 ```bash
 cd build
 cmake ..          # re-scan src/ for new/removed files
@@ -55,8 +60,9 @@ make -j$(nproc)
 
 If the build is in a broken state (stale paths, weird linker errors), the
 safest fix is a clean rebuild:
+
 ```bash
-cd ~/OpenGL_world
+cd ~/Documents/VSC/OpenGL/OpenGL_world
 rm -rf build
 mkdir build && cd build
 cmake ..
@@ -64,19 +70,22 @@ make -j$(nproc)
 ```
 
 ### Updating dependencies / GLM path
+
 If CMake can't find GLM (`Could not find GLM_INCLUDE_DIR`), make sure GLM's
 headers live under `include/glm/glm/glm.hpp` relative to the project root,
 matching the `HINTS` path in `CMakeLists.txt`. Adjust the `HINTS` path there
 if you relocate the GLM folder.
 
 ## Controls
-| Input | Action |
-|---|---|
+
+| Input                 | Action                                    |
+|-----------------------|-------------------------------------------|
 | `W` / `A` / `S` / `D` | Move camera forward / left / back / right |
-| Mouse movement | Look around |
-| Scroll wheel | Zoom (adjusts FOV) |
+| Mouse movement        | Look around                               |
+| Scroll wheel          | Zoom (adjusts FOV)                        |
 
 ## Project Structure
+
 ```
 OpenGL_world/
 ├── CMakeLists.txt
@@ -106,32 +115,22 @@ OpenGL_world/
 ## Updates
 
 ### Lighting shaders — Phong lighting (2026-09-15)
-- Shaders moved out of `src/` into their own `include/shaders/` folder, and
-  split into two pairs:
-  - `lightshader.vs` / `lightshader.fs` — draws the cube that represents the
-    light source itself (a simple, unlit solid color).
-  - `cubelightshader.vs` / `cubelightshader.fs` — draws the lit object,
-    implementing basic Phong lighting: ambient, diffuse, and specular terms
-    computed from the vertex normal, light position, and view position.
-- Added `shader_debug.h` under `include/` for shader compile/link error
-  checking.
+
+- Shaders moved out of `src/` into their own `include/shaders/` folder, and split into two pairs:
+  - `lightshader.vs` / `lightshader.fs` — draws the cube that represents the light source itself (a simple, unlit solid color).
+  - `cubelightshader.vs` / `cubelightshader.fs` — draws the lit object, implementing basic Phong lighting: ambient, diffuse, and specular terms computed from the vertex normal, light position, and view position.
+- Added `shader_debug.h` under `include/` for shader compile/link error checking.
 
 ### Texture loading (Texture2D class)
-- Added a `Texture2D` class (constructor + `bind()`), following the same
-  pattern as the existing `Shader` class — one object per texture, path
-  passed to the constructor.
-- Constructor handles `glGenTextures`/`glBindTexture`, wrap/filter params,
-  loading via `stbi_load`, and uploading with `glTexImage2D` +
-  `glGenerateMipmap`.
-- Format (`GL_RGB` vs `GL_RGBA`) is chosen dynamically based on the
-  channel count returned by `stbi_load`, so both JPG (3 channels) and
-  PNG (4 channels, with alpha) load correctly.
-- `stbi_set_flip_vertically_on_load(true)` set before loading, to match
-  OpenGL's expected texture coordinate origin.
-- Two texture units bound in the render loop via `glActiveTexture` +
-  `bind()`, for the multi-texture blending feature listed above.
+
+- Added a `Texture2D` class (constructor + `bind()`), following the same pattern as the existing `Shader` class — one object per texture, path passed to the constructor.
+- Constructor handles `glGenTextures`/`glBindTexture`, wrap/filter params, loading via `stbi_load`, and uploading with `glTexImage2D` + `glGenerateMipmap`.
+- Format (`GL_RGB` vs `GL_RGBA`) is chosen dynamically based on the channel count returned by `stbi_load`, so both JPG (3 channels) and PNG (4 channels, with alpha) load correctly.
+- `stbi_set_flip_vertically_on_load(true)` set before loading, to match OpenGL's expected texture coordinate origin.
+- Two texture units bound in the render loop via `glActiveTexture` + `bind()`, for the multi-texture blending feature listed above.
 
 ## Roadmap
+
 - [ ] Terrain generation (heightmap-based)
 - [ ] Load and render 3D models (e.g. via Assimp)
 - [ ] Full object rotation controls (all axes)
@@ -144,7 +143,9 @@ OpenGL_world/
 ---
 
 ### Keeping this README up to date
+
 As the project evolves, update:
+
 - **Features** — check off/add items as they're implemented
 - **Roadmap** — move completed items up to Features, add new goals
 - **Project Structure** — reflect new files/folders as they're added
