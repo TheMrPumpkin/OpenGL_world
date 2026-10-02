@@ -99,7 +99,7 @@ OpenGL_world/
 
 ## Updates
 
-### Light casters (2026-09-28)
+### Light casters (2026-09-30)
 
 - Extended the Phong lighting shader to support different types of light casters:
   - **Directional light**: a light with no position, only a direction (like the sun), so all rays are parallel.
