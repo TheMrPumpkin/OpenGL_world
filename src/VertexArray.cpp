@@ -58,11 +58,15 @@ void VertexArray::Vertexarray()
         -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f};
 
 
+
+        
     cubePositions = {glm::vec3(0.0f, 0.0f, 0.0f) , 
                      glm::vec3(1.0f, 5.0f, 2.0f) ,
                      glm::vec3(-2.5f, 1.0f, 4.2f),
                      glm::vec3(10.0f, -3.5f, 0.5f),
                      glm::vec3(0.0f, 10.0f, -5.0f)};
+    glm::vec3 lightcubePositions[] = {glm::vec3(0.2f, 0.0f, 0.0f) , 
+                     glm::vec3(2.0f, 0.0f, 2.0f) };
      // make the array longer (push_back)
 
     glGenVertexArrays(1, &VAO);

@@ -2,9 +2,9 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <math.h>
-#include "/home/pumpkin/Documents/Code and Development/OpenGL_world/include/shader_debug.h"
+#include "shader_debug.h"
 #define STB_IMAGE_IMPLEMENTATION
-#include "/home/pumpkin/Documents/Code and Development/OpenGL_world/include/stb_image.h"
+#include "stb_image.h"
 #include "OpenGLDebug.h"
 #include "camera.h"
 #include "Mouse.h"
@@ -26,6 +26,9 @@ Mouse mouse;
 VertexArray vertexArray;
 
 glm::vec3 lightPos(1.2f, 0.5f, 2.3f);
+glm::vec3 lightcubePositions[] = {glm::vec3(2.0f, 0.0f, 0.0f) , 
+                     glm::vec3(0.9f, 9.0f, -4.0f) };
+                     
 void frame_buffer_callback(GLFWwindow *window, int w, int h);
 void input_press(GLFWwindow *window);
 void mouse_callback(GLFWwindow *window, double xpos, double ypos);
@@ -78,33 +81,61 @@ int main()
     Texture2D diffuseMap(FileSystem::getPath("/images/container2.png").c_str());
     Texture2D specularMap(FileSystem::getPath("/images/container2_specular.png").c_str());
 
+
     lightshader.use();
     lightshader.setInt("material.diffuse", 0);
     lightshader.setInt("material.specular" ,1);
+
+
+
     while (!glfwWindowShouldClose(window))
     {
         camera.move(window);
         // BG
         glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+        
         
 
         lightshader.use();
-        lightshader.setVec3("light.ambient", 0.1f, 0.1f, 0.1f);
-        lightshader.setVec3("light.diffuse", 0.5f, 0.5f, 0.5f);
-        lightshader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
-        lightshader.setFloat("light.constant" , 1.0f);
-        lightshader.setFloat("light.linear" , 0.09f); // small = big 
-        lightshader.setFloat("light.quadratic" , 0.032f); // small = big 
-
-        // material properties
         lightshader.setFloat("material.shininess", 64.0f);
-        lightshader.setVec3("light.position", camera.cameraPos.x, camera.cameraPos.y, camera.cameraPos.z);
-        lightshader.setVec3("light.direction", camera.cameraFront.x, camera.cameraFront.y, camera.cameraFront.z);
-        lightshader.setFloat("light.cutoff" , glm::cos(glm::radians(40.0f)));
-        lightshader.setFloat("light.outercutoff" , glm::cos(glm::radians(50.0f)));
         lightshader.setVec3("viewPos", camera.cameraPos.x, camera.cameraPos.y, camera.cameraPos.z);
+
+        lightshader.setVec3("dirLight.direction", -2.0f, 0.5f, 1.0f);
+        lightshader.setVec3("dirLight.ambient", 0.1f, 0.1f, 0.1f);
+        lightshader.setVec3("dirLight.diffuse", 0.5f, 0.5f, 0.5f);
+        lightshader.setVec3("dirLight.specular", 1.0f, 1.0f, 1.0f);
+
+
+        lightshader.setVec3("pointLights[0].position" , lightcubePositions[0].x , lightcubePositions[0].y , lightcubePositions[0].z);
+        lightshader.setVec3("pointLights[0].ambient", 0.1f, 0.1f, 0.1f);
+        lightshader.setVec3("pointLights[0].diffuse", 0.5f, 0.5f, 0.5f);
+        lightshader.setVec3("pointLights[0].specular", 1.0f, 1.0f, 1.0f);
+        lightshader.setFloat("pointLights[0].constant" , 1.0f);
+        lightshader.setFloat("pointLights[0].linear" , 0.09f); // small = big 
+        lightshader.setFloat("pointLights[0].quadratic" , 0.032f); // small = big 
+
+
+
+        lightshader.setVec3("pointLights[1].position" , lightcubePositions[1].x , lightcubePositions[1].y , lightcubePositions[1].z);
+        lightshader.setVec3("pointLights[1].ambient", 0.1f, 0.1f, 0.1f);
+        lightshader.setVec3("pointLights[1].diffuse", 0.5f, 0.5f, 0.5f);
+        lightshader.setVec3("pointLights[1].specular", 1.0f, 1.0f, 1.0f);
+        lightshader.setFloat("pointLights[1].constant" , 1.0f);
+        lightshader.setFloat("pointLights[1].linear" , 0.09f); // small = big 
+        lightshader.setFloat("pointLights[1].quadratic" , 0.032f); // small = big 
+
+        lightshader.setVec3("spotLight.ambient", 0.1f, 0.1f, 0.1f);
+        lightshader.setVec3("spotLight.diffuse", 0.5f, 0.5f, 0.5f);
+        lightshader.setVec3("spotLight.specular", 1.0f, 1.0f, 1.0f);
+        lightshader.setFloat("spotLight.constant" , 1.0f);
+        lightshader.setFloat("spotLight.linear" , 0.09f); // small = big 
+        lightshader.setFloat("spotLight.quadratic" , 0.032f); // small = big 
+        lightshader.setVec3("spotLight.position", camera.cameraPos.x, camera.cameraPos.y, camera.cameraPos.z);
+        lightshader.setVec3("spotLight.direction", camera.cameraFront.x, camera.cameraFront.y, camera.cameraFront.z);
+        lightshader.setFloat("spotLight.cutoff" , glm::cos(glm::radians(40.0f)));
+        lightshader.setFloat("spotLight.outercutoff" , glm::cos(glm::radians(50.0f)));
+        
 
         glm::mat4 view = camera.GetViewMatrix();
         lightshader.setMat4("view", view);
@@ -136,14 +167,14 @@ int main()
         cubelightshader.setMat4("view", view);
 
         cubelightshader.setMat4("proj", proj);
-
-        //  model = glm::mat4(1.0f);
-        //  model = glm::translate(model, lightPos);
-        // model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 5.0f));
-        //  model = glm::scale(model, glm::vec3(0.2f));
-        //  cubelightshader.setMat4("model", model);
-        //  glBindVertexArray(lightVAO);
-        // glDrawArrays(GL_TRIANGLES, 0, 36);
+        glBindVertexArray(lightVAO);
+        for (int i = 0; i < 2; i++){
+         glm::mat4 model = glm::mat4(1.0f);
+          model = glm::translate(model, lightcubePositions[i]);
+         model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 5.0f));
+         model = glm::scale(model, glm::vec3(0.2f));
+          cubelightshader.setMat4("model", model);
+        glDrawArrays(GL_TRIANGLES, 0, 36); }
 
         camera.cords();
 
