@@ -36,7 +36,7 @@ public:
     void move(GLFWwindow *window);
 
     void rotate();
-
+    
     void cords();
 };
 

@@ -5,7 +5,6 @@
 #include "shader_debug.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
-#include "OpenGLDebug.h"
 #include "camera.h"
 #include "Mouse.h"
 #include "VertexArray.h"
