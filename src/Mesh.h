@@ -22,6 +22,7 @@ struct Vertex {
 struct Texture{
     unsigned int id;
     std::string type;
+    std::string path;
 };
 
 
@@ -31,12 +32,12 @@ class Mesh
 public:
 // mash data
 std::vector<Vertex>     vertices;
-std::vector<unsigned int> include;
+std::vector<unsigned int> indices;
 std::vector<Texture> textures;
 
-Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> include  , std::vector<Texture> textures){
+Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices  , std::vector<Texture> textures){
     this-> vertices = vertices;
-    this-> include = include;
+    this-> indices = indices;
     this-> textures = textures;
 
     setupMesh();
@@ -56,14 +57,16 @@ void Draw(Shader &Shader){
     else if (name == "texture_specular") {
     number = std::to_string(specularNr++);
     }
-    Shader.setInt(("material." + name + number).c_str(), i);
+    if (name == "texture_diffuse") {
+        Shader.setInt("texture_diffuse1", i);
+    }
     glBindTexture(GL_TEXTURE_2D , textures[i].id);
     }
     glActiveTexture(GL_TEXTURE0);
     
     // draw mesh
     glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES , include.size() , GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES , indices.size() , GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
     
 }
@@ -82,7 +85,7 @@ void setupMesh(){
     glBindBuffer(GL_ARRAY_BUFFER , VBO);
     glBufferData(GL_ARRAY_BUFFER , vertices.size() * sizeof(Vertex) , &vertices[0],GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER , EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER  , include.size() * sizeof(unsigned int) , &include[0],GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER  , indices.size() * sizeof(unsigned int) , &indices[0],GL_STATIC_DRAW);
 
     // pos 
     glEnableVertexAttribArray(0);
