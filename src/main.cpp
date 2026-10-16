@@ -109,13 +109,13 @@ int main()
         lightshader.setVec3("dirLight.specular", 1.0f, 1.0f, 1.0f);
 
 
-        // lightshader.setVec3("pointLights[0].position" , lightcubePositions[0].x , lightcubePositions[0].y , lightcubePositions[0].z);
-        // lightshader.setVec3("pointLights[0].ambient", 0.1f, 0.1f, 0.1f);
-        // lightshader.setVec3("pointLights[0].diffuse", 0.5f, 0.5f, 0.5f);
-        // lightshader.setVec3("pointLights[0].specular", 1.0f, 1.0f, 1.0f);
-        // lightshader.setFloat("pointLights[0].constant" , 1.0f);
-        // lightshader.setFloat("pointLights[0].linear" , 0.09f); // small = big 
-        // lightshader.setFloat("pointLights[0].quadratic" , 0.032f); // small = big 
+        lightshader.setVec3("pointLights[0].position" , lightcubePositions[0].x , lightcubePositions[0].y , lightcubePositions[0].z);
+         lightshader.setVec3("pointLights[0].ambient", 0.1f, 0.1f, 0.1f);
+         lightshader.setVec3("pointLights[0].diffuse", 0.5f, 0.5f, 0.5f);
+         lightshader.setVec3("pointLights[0].specular", 1.0f, 1.0f, 1.0f);
+         lightshader.setFloat("pointLights[0].constant" , 1.0f);
+         lightshader.setFloat("pointLights[0].linear" , 0.09f); // small = big 
+         lightshader.setFloat("pointLights[0].quadratic" , 0.032f); // small = big 
 
 
 
@@ -176,14 +176,14 @@ int main()
 
         cubelightshader.setMat4("proj", proj);
         
-        // glBindVertexArray(lightVAO);
-        // for (int i = 0; i < 2; i++){
-        //  glm::mat4 model = glm::mat4(1.0f);
-        //   model = glm::translate(model, lightcubePositions[i]);
-        //  model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 5.0f));
-        //  model = glm::scale(model, glm::vec3(0.2f));
-        //   cubelightshader.setMat4("model", model);
-        // glDrawArrays(GL_TRIANGLES, 0, 36); }
+        glBindVertexArray(lightVAO);
+        for (int i = 0; i < 1; i++){
+          glm::mat4 model = glm::mat4(1.0f);
+          model = glm::translate(model, lightcubePositions[i]);
+         model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 5.0f));
+         model = glm::scale(model, glm::vec3(0.2f));
+          cubelightshader.setMat4("model", model);
+        glDrawArrays(GL_TRIANGLES, 0, 36); }
 
         camera.cords();
 
