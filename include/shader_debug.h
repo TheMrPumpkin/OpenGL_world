@@ -17,7 +17,7 @@ public:
     unsigned int ID;
     // constructor generates the shader on the fly
     // ------------------------------------------------------------------------
-    Shader(const char *vertexPath, const char *fragmentPath)
+    Shader(const char *vertexPath, const char *fragmentPath, const char *lightPath = nullptr)
     {
         // 1. retrieve the vertex/fragment source code from filePath
         std::string vertexCode;
@@ -42,6 +42,18 @@ public:
             // convert stream into string
             vertexCode = vShaderStream.str();
             fragmentCode = fShaderStream.str();
+
+            // if a light file was given, put it BEFORE the fragment code
+            if (lightPath != nullptr)
+            {
+                std::ifstream lShaderFile;
+                lShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+                lShaderFile.open(lightPath);
+                std::stringstream lShaderStream;
+                lShaderStream << lShaderFile.rdbuf();
+                lShaderFile.close();
+                fragmentCode = lShaderStream.str() + "\n" + fragmentCode;
+            }
         }
         catch (std::ifstream::failure &e)
         {

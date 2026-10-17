@@ -1,3 +1,4 @@
+#include <fstream>
 #include <iostream>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -23,7 +24,6 @@ Camera camera;
 Mouse mouse;
 // VertexArray
 VertexArray vertexArray;
-
 glm::vec3 lightPos(1.2f, 0.5f, 2.3f);
 glm::vec3 lightcubePositions[] = {glm::vec3(2.0f, 0.0f, 0.0f) , 
                      glm::vec3(0.9f, 9.0f, -4.0f) };
@@ -64,10 +64,13 @@ int main()
     }
     enableOpenGLDebug();
     glEnable(GL_DEPTH_TEST);
-    Shader lightshader("/home/pumpkin/Documents/Code and Development/OpenGL_world/include/shaders/lightshader.vs",
-                       "/home/pumpkin/Documents/Code and Development/OpenGL_world/include/shaders/lightshader.fs");
-    Shader cubelightshader("/home/pumpkin/Documents/Code and Development/OpenGL_world/include/shaders/cubelightshader.vs",
-                           "/home/pumpkin/Documents/Code and Development/OpenGL_world/include/shaders/cubelightshader.fs");
+    //Shader lightshader("/home/pumpkin/Documents/Code and Development/OpenGL_world/include/shaders/lightshader.vs",
+                       //"/home/pumpkin/Documents/Code and Development/OpenGL_world/include/shaders/lightshader.fs");
+    Shader cubelightshader("/home/pumpkin/Documents/Code and Development/OpenGL_world/include/shaders/lightcube.vs",
+                           "/home/pumpkin/Documents/Code and Development/OpenGL_world/include/shaders/lightcube.fs");
+    Shader ModelShader("/home/pumpkin/Documents/Code and Development/OpenGL_world/include/shaders/model.vs" ,
+         "/home/pumpkin/Documents/Code and Development/OpenGL_world/include/shaders/model.fs",
+        "/home/pumpkin/Documents/Code and Development/OpenGL_world/include/shaders/light.glsl");
 
     vertexArray.Vertexarray();
     vertexArray.cubePositions;
@@ -85,13 +88,14 @@ int main()
 
 
 
-    lightshader.use();
-    lightshader.setInt("texture_diffuse1", 0);
+    ModelShader.use();
+    ModelShader.setInt("texture_diffuse1", 0);
 
     
 
     while (!glfwWindowShouldClose(window))
     {
+  
         camera.move(window);
         // BG
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -99,76 +103,53 @@ int main()
         
         
 
-        lightshader.use();
-        lightshader.setFloat("material.shininess", 64.0f);
-        lightshader.setVec3("viewPos", camera.cameraPos.x, camera.cameraPos.y, camera.cameraPos.z);
+        ModelShader.use();
+        ModelShader.setFloat("material.shininess", 64.0f);
+        ModelShader.setVec3("viewPos", camera.cameraPos.x, camera.cameraPos.y, camera.cameraPos.z);
 
-        lightshader.setVec3("dirLight.direction", -2.0f, 0.5f, 1.0f);
-        lightshader.setVec3("dirLight.ambient", 0.1f, 0.1f, 0.1f);
-        lightshader.setVec3("dirLight.diffuse", 0.5f, 0.5f, 0.5f);
-        lightshader.setVec3("dirLight.specular", 1.0f, 1.0f, 1.0f);
-
-
-        lightshader.setVec3("pointLights[0].position" , lightcubePositions[0].x , lightcubePositions[0].y , lightcubePositions[0].z);
-         lightshader.setVec3("pointLights[0].ambient", 0.1f, 0.1f, 0.1f);
-         lightshader.setVec3("pointLights[0].diffuse", 0.5f, 0.5f, 0.5f);
-         lightshader.setVec3("pointLights[0].specular", 1.0f, 1.0f, 1.0f);
-         lightshader.setFloat("pointLights[0].constant" , 1.0f);
-         lightshader.setFloat("pointLights[0].linear" , 0.09f); // small = big 
-         lightshader.setFloat("pointLights[0].quadratic" , 0.032f); // small = big 
+        ModelShader.setVec3("dirLight.direction", -2.0f, 0.5f, 1.0f);
+        ModelShader.setVec3("dirLight.ambient", 0.1f, 0.1f, 0.1f);
+        ModelShader.setVec3("dirLight.diffuse", 0.5f, 0.5f, 0.5f);
+        ModelShader.setVec3("dirLight.specular", 1.0f, 1.0f, 1.0f);
 
 
+        ModelShader.setVec3("pointLights[0].position" , lightcubePositions[0].x , lightcubePositions[0].y , lightcubePositions[0].z);
+         ModelShader.setVec3("pointLights[0].ambient", 0.1f, 0.1f, 0.1f);
+         ModelShader.setVec3("pointLights[0].diffuse", 0.5f, 0.5f, 0.5f);
+         ModelShader.setVec3("pointLights[0].specular", 1.0f, 1.0f, 1.0f);
+         ModelShader.setFloat("pointLights[0].constant" , 1.0f);
+         ModelShader.setFloat("pointLights[0].linear" , 0.09f); // small = big 
+         ModelShader.setFloat("pointLights[0].quadratic" , 0.032f); // small = big 
 
-        // lightshader.setVec3("pointLights[1].position" , lightcubePositions[1].x , lightcubePositions[1].y , lightcubePositions[1].z);
-        // lightshader.setVec3("pointLights[1].ambient", 0.1f, 0.1f, 0.1f);
-        // lightshader.setVec3("pointLights[1].diffuse", 0.5f, 0.5f, 0.5f);
-        // lightshader.setVec3("pointLights[1].specular", 1.0f, 1.0f, 1.0f);
-        // lightshader.setFloat("pointLights[1].constant" , 1.0f);
-        // lightshader.setFloat("pointLights[1].linear" , 0.09f); // small = big 
-        // lightshader.setFloat("pointLights[1].quadratic" , 0.032f); // small = big 
-
-        lightshader.setVec3("spotLight.ambient", 0.1f, 0.1f, 0.1f);
-        lightshader.setVec3("spotLight.diffuse", 0.5f, 0.5f, 0.5f);
-        lightshader.setVec3("spotLight.specular", 1.0f, 1.0f, 1.0f);
-        lightshader.setFloat("spotLight.constant" , 1.0f);
-        lightshader.setFloat("spotLight.linear" , 0.09f); // small = big 
-        lightshader.setFloat("spotLight.quadratic" , 0.032f); // small = big 
-        lightshader.setVec3("spotLight.position", camera.cameraPos.x, camera.cameraPos.y, camera.cameraPos.z);
-        lightshader.setVec3("spotLight.direction", camera.cameraFront.x, camera.cameraFront.y, camera.cameraFront.z);
-        lightshader.setFloat("spotLight.cutoff" , glm::cos(glm::radians(40.0f)));
-        lightshader.setFloat("spotLight.outercutoff" , glm::cos(glm::radians(50.0f)));
+        ModelShader.setVec3("spotLight.ambient", 0.1f, 0.1f, 0.1f);
+        ModelShader.setVec3("spotLight.diffuse", 0.5f, 0.5f, 0.5f);
+        ModelShader.setVec3("spotLight.specular", 1.0f, 1.0f, 1.0f);
+        ModelShader.setFloat("spotLight.constant" , 1.0f);
+        ModelShader.setFloat("spotLight.linear" , 0.09f); // small = big 
+        ModelShader.setFloat("spotLight.quadratic" , 0.032f); // small = big 
+        ModelShader.setVec3("spotLight.position", camera.cameraPos.x, camera.cameraPos.y, camera.cameraPos.z);
+        ModelShader.setVec3("spotLight.direction", camera.cameraFront.x, camera.cameraFront.y, camera.cameraFront.z);
+        ModelShader.setFloat("spotLight.cutoff" , glm::cos(glm::radians(40.0f)));
+        ModelShader.setFloat("spotLight.outercutoff" , glm::cos(glm::radians(50.0f)));
         
 
         glm::mat4 view = camera.GetViewMatrix();
-        lightshader.setMat4("view", view);
+        ModelShader.setMat4("view", view);
 
         glm::mat4 proj = camera.perspective(screen_w, screen_h);
-        lightshader.setMat4("proj", proj);
+        ModelShader.setMat4("proj", proj);
 
 
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
         model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
-        lightshader.setMat4("model", model);
-        mycoolModel.Draw(lightshader);
-        // glActiveTexture(GL_TEXTURE1);
-        // specularMap.bind();
-        // glActiveTexture(GL_TEXTURE0);
-        // diffuseMap.bind();
+        ModelShader.setMat4("model", model);
+        glPolygonMode(GL_FRONT_AND_BACK , GL_LINE);
+        mycoolModel.Draw(ModelShader);
 
         vertexArray.bindVAO();
 
 
-
-        //  for (int i = 0; i < 5; i++)
-        //  {
-        // glm::mat4 model = glm::mat4(1.0f);
-        // model  = glm::translate(model  , vertexArray.cubePositions[i]);
-        // model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(1.0f, 3.0f, 2.0f));
-        // lightshader.setMat4("model", model);
-        // glDrawArrays(GL_TRIANGLES, 0, 36);
-        // }
-        
 
         cubelightshader.use();
 
@@ -185,7 +166,7 @@ int main()
           cubelightshader.setMat4("model", model);
         glDrawArrays(GL_TRIANGLES, 0, 36); }
 
-        camera.cords();
+       // camera.cords();
 
         // window
         glfwSwapBuffers(window);

@@ -48,7 +48,7 @@ void Camera::rotate() // when this is rotate
 void Camera::move(GLFWwindow *window) // when this is move
 {
     cam_speed = 0.05f;
-    std::cout << "cam speed: " << cam_speed << std::endl;
+    // std::cout << "cam speed: " << cam_speed << std::endl;
 
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
     {
