@@ -14,6 +14,11 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+#include "fpscounter.h"
+#include "shadersmenu.h"
 
 const unsigned int screen_w = 950;
 const unsigned int screen_h = 850;
@@ -24,10 +29,10 @@ Camera camera;
 Mouse mouse;
 // VertexArray
 VertexArray vertexArray;
+// Shader properties menu
+Shaders_menu shaderMenu;
 glm::vec3 lightPos(1.2f, 0.5f, 2.3f);
-glm::vec3 lightcubePositions[] = {glm::vec3(2.0f, 0.0f, 0.0f) , 
-                     glm::vec3(0.9f, 9.0f, -4.0f) };
-                     
+
 void frame_buffer_callback(GLFWwindow *window, int w, int h);
 void input_press(GLFWwindow *window);
 void mouse_callback(GLFWwindow *window, double xpos, double ypos);
@@ -64,6 +69,15 @@ int main()
     }
     enableOpenGLDebug();
     glEnable(GL_DEPTH_TEST);
+
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange; // we own the cursor (ESC)
+    ImGui::StyleColorsDark();
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init("#version 440");
+
+    Fps_counter fpsCounter;
     //Shader lightshader("/home/pumpkin/Documents/Code and Development/OpenGL_world/include/shaders/lightshader.vs",
                        //"/home/pumpkin/Documents/Code and Development/OpenGL_world/include/shaders/lightshader.fs");
     Shader cubelightshader("/home/pumpkin/Documents/Code and Development/OpenGL_world/include/shaders/lightcube.vs",
@@ -95,8 +109,17 @@ int main()
 
     while (!glfwWindowShouldClose(window))
     {
-  
-        camera.move(window);
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
+        fpsCounter.update();
+
+        if (shaderMenu.update(window))
+            mouse.firstMouse = true; // no view snap when the cursor is captured again
+
+        if (!shaderMenu.menuMode)
+            camera.move(window);
         // BG
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -104,34 +127,11 @@ int main()
         
 
         ModelShader.use();
-        ModelShader.setFloat("material.shininess", 64.0f);
         ModelShader.setVec3("viewPos", camera.cameraPos.x, camera.cameraPos.y, camera.cameraPos.z);
+        shaderMenu.apply(ModelShader);
 
-        ModelShader.setVec3("dirLight.direction", -2.0f, 0.5f, 1.0f);
-        ModelShader.setVec3("dirLight.ambient", 0.1f, 0.1f, 0.1f);
-        ModelShader.setVec3("dirLight.diffuse", 0.5f, 0.5f, 0.5f);
-        ModelShader.setVec3("dirLight.specular", 1.0f, 1.0f, 1.0f);
-
-
-        ModelShader.setVec3("pointLights[0].position" , lightcubePositions[0].x , lightcubePositions[0].y , lightcubePositions[0].z);
-         ModelShader.setVec3("pointLights[0].ambient", 0.1f, 0.1f, 0.1f);
-         ModelShader.setVec3("pointLights[0].diffuse", 0.5f, 0.5f, 0.5f);
-         ModelShader.setVec3("pointLights[0].specular", 1.0f, 1.0f, 1.0f);
-         ModelShader.setFloat("pointLights[0].constant" , 1.0f);
-         ModelShader.setFloat("pointLights[0].linear" , 0.09f); // small = big 
-         ModelShader.setFloat("pointLights[0].quadratic" , 0.032f); // small = big 
-
-        ModelShader.setVec3("spotLight.ambient", 0.1f, 0.1f, 0.1f);
-        ModelShader.setVec3("spotLight.diffuse", 0.5f, 0.5f, 0.5f);
-        ModelShader.setVec3("spotLight.specular", 1.0f, 1.0f, 1.0f);
-        ModelShader.setFloat("spotLight.constant" , 1.0f);
-        ModelShader.setFloat("spotLight.linear" , 0.09f); // small = big 
-        ModelShader.setFloat("spotLight.quadratic" , 0.032f); // small = big 
         ModelShader.setVec3("spotLight.position", camera.cameraPos.x, camera.cameraPos.y, camera.cameraPos.z);
         ModelShader.setVec3("spotLight.direction", camera.cameraFront.x, camera.cameraFront.y, camera.cameraFront.z);
-        ModelShader.setFloat("spotLight.cutoff" , glm::cos(glm::radians(40.0f)));
-        ModelShader.setFloat("spotLight.outercutoff" , glm::cos(glm::radians(50.0f)));
-        
 
         glm::mat4 view = camera.GetViewMatrix();
         ModelShader.setMat4("view", view);
@@ -160,7 +160,7 @@ int main()
         glBindVertexArray(lightVAO);
         for (int i = 0; i < 1; i++){
           glm::mat4 model = glm::mat4(1.0f);
-          model = glm::translate(model, lightcubePositions[i]);
+          model = glm::translate(model, shaderMenu.point_position);
          model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 5.0f));
          model = glm::scale(model, glm::vec3(0.2f));
           cubelightshader.setMat4("model", model);
@@ -168,10 +168,25 @@ int main()
 
        // camera.cords();
 
+        fpsCounter.draw();
+        shaderMenu.draw();
+
+        ImGui::Render();
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // scene draws in GL_LINE
+        glDisable(GL_DEPTH_TEST);
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        glEnable(GL_DEPTH_TEST);
+
         // window
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
+
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+    glfwDestroyWindow(window);
+    glfwTerminate();
 }
 void frame_buffer_callback(GLFWwindow *window, int w, int h)
 {
@@ -180,10 +195,14 @@ void frame_buffer_callback(GLFWwindow *window, int w, int h)
 
 void mouse_callback(GLFWwindow *window, double xpos, double ypos)
 {
+    if (shaderMenu.menuMode)
+        return; // cursor is free for ImGui
     mouse.mouse_callback(window, xpos, ypos);
 }
 
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
 {
+    if (shaderMenu.menuMode)
+        return; // cursor is free for ImGui
     mouse.scroll_callback(window, xoffset, yoffset);
 }

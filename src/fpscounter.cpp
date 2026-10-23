@@ -10,6 +10,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "shader_debug.h"
 #include "fpscounter.h"
+#include "imgui.h"
 
 Fps_counter::Fps_counter() {
     counter = 0;
@@ -31,4 +32,12 @@ void Fps_counter::update()
         counter = 0;           
         prevTime = crntTime;   
     }
+}
+
+void Fps_counter::draw()
+{
+    ImGui::SetNextWindowPos(ImVec2(10.0f, 10.0f), ImGuiCond_FirstUseEver);
+    ImGui::Begin("FPS", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoDecoration);
+    ImGui::Text("FPS: %u", current_fps);
+    ImGui::End();
 }

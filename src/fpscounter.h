@@ -29,6 +29,7 @@ public:
     Fps_counter();   
     
     void update();          
+    void draw();            
     unsigned int get_fps() const { return current_fps; }
 };
 
